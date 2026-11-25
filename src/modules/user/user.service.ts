@@ -33,7 +33,7 @@ export class UserService {
 
         }
         const { accessToken, refreshToken } = await this.tokenService.createLoginCredentials({ user, issuer });
-        await tokenService.createRevokeToken({ payload });
+        await this.tokenService.createRevokeToken({ payload });
         return { accessToken, refreshToken };
     }
 
@@ -42,7 +42,14 @@ export class UserService {
             case LogoutEnum.All:
                 user.changeCredentialsTime = new Date();
                 await user.save();
-                await this.casheService.del({ key: await this.casheService.keys({ prefix: this.tokenService.userBaseRevokeTokenKey({ userId: payload.sub }) }) });
+                console.log({ k: await this.casheService.keys({ prefix: this.tokenService.userBaseRevokeTokenKey({ userId: payload.sub }) }) });
+                console.log(this.tokenService.userBaseRevokeTokenKey({ userId: payload.sub }));
+
+                await this.casheService.del({
+                    key: await this.casheService.keys({
+                        prefix: this.tokenService.userBaseRevokeTokenKey({ userId: payload.sub })
+                    })
+                });
 
                 break;
 

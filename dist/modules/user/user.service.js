@@ -28,7 +28,7 @@ class UserService {
             throw new Application_exception_js_1.ConflictException('sorry we cannot create new  login credentials while current access token still valid');
         }
         const { accessToken, refreshToken } = await this.tokenService.createLoginCredentials({ user, issuer });
-        await token_service_1.tokenService.createRevokeToken({ payload });
+        await this.tokenService.createRevokeToken({ payload });
         return { accessToken, refreshToken };
     }
     async logout(payload, user, { action = enum_js_1.LogoutEnum.Device }) {
@@ -36,7 +36,13 @@ class UserService {
             case enum_js_1.LogoutEnum.All:
                 user.changeCredentialsTime = new Date();
                 await user.save();
-                await this.casheService.del({ key: await this.casheService.keys({ prefix: this.tokenService.userBaseRevokeTokenKey({ userId: payload.sub }) }) });
+                console.log({ k: await this.casheService.keys({ prefix: this.tokenService.userBaseRevokeTokenKey({ userId: payload.sub }) }) });
+                console.log(this.tokenService.userBaseRevokeTokenKey({ userId: payload.sub }));
+                await this.casheService.del({
+                    key: await this.casheService.keys({
+                        prefix: this.tokenService.userBaseRevokeTokenKey({ userId: payload.sub })
+                    })
+                });
                 break;
             default:
                 await this.tokenService.createRevokeToken({ payload });
